@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../app.dart';
 import '../core/formatters.dart';
+import '../core/theme.dart';
 import '../data/active_session_store.dart';
 import '../models/task.dart';
 import '../services/notification_service.dart';
@@ -158,7 +159,7 @@ class _TimerScreenState extends State<TimerScreen>
                     if (_session.ghostFinished)
                       const Text(
                         'Ghost finished. You are behind your record.',
-                        style: TextStyle(color: Colors.white54),
+                        style: TextStyle(color: AppColors.label),
                       ),
                     const SizedBox(height: 48),
                     FilledButton.icon(

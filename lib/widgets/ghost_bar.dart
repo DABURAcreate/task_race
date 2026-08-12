@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/theme.dart';
 
 /// Two bars filling against the same clock.
 /// The ghost bar fills faster when your best time is faster than your estimate.
@@ -16,16 +17,14 @@ class GhostBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _label(context, 'YOU'),
-        _bar(progress, scheme.primary),
+        _bar(progress, AppColors.primaryBar),
         const SizedBox(height: 16),
         _label(context, hasGhost ? 'GHOST (your best)' : 'NO GHOST YET'),
-        _bar(ghostProgress, Colors.white24),
+        _bar(ghostProgress, AppColors.ghostBar),
       ],
     );
   }
@@ -40,7 +39,7 @@ class GhostBar extends StatelessWidget {
     child: LinearProgressIndicator(
       value: value,
       minHeight: 14,
-      backgroundColor: Colors.white10,
+      backgroundColor: AppColors.surface,
       valueColor: AlwaysStoppedAnimation(color),
     ),
   );

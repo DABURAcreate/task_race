@@ -54,6 +54,23 @@ tasks — studying, research, work, drawing — not chores.
 - **Persistence** — tasks and run history are saved locally
   (`shared_preferences`) and reload on next launch.
 
+## Theme
+
+A fixed dark blue palette, defined once as `AppColors` in `lib/core/theme.dart`
+and wired into `ThemeData` (backgrounds, cards, buttons) plus referenced
+directly by the ghost bar:
+
+| Color | Hex | Used for |
+| --- | --- | --- |
+| Background | `#03045E` | Scaffold background |
+| Surface | `#012A4A` | Cards, progress bar tracks |
+| Primary | `#00B4D8` | Your progress bar, filled buttons, FAB |
+| Ghost | `#2C7DA0` | The ghost's progress bar |
+| Label | `#90E0EF` | Labels and secondary text (list subtitles, captions) |
+
+Status colors (win/loss, delete, new-record) stay separate from this palette
+since they're semantic, not decorative.
+
 ## Project structure
 
 ```
@@ -61,7 +78,7 @@ lib/
   main.dart                    entry point
   app.dart                     app shell, AppScope (DI), startup gating
   core/
-    theme.dart                 app theme
+    theme.dart                 app theme, AppColors palette
     formatters.dart            time/date formatting
     accuracy.dart              estimate-accuracy math
   models/
