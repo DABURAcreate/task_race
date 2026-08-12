@@ -306,10 +306,11 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => AppScope.of(context).repo.deleteCategory(category));
   }
 
-  void _openHistory(Task task) {
-    Navigator.of(
+  Future<void> _openHistory(Task task) async {
+    await Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => HistoryScreen(task: task)));
+    if (mounted) setState(() {}); // refresh stats if a run was edited/deleted
   }
 
   Future<void> _startTask(Task task) async {

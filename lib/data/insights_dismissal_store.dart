@@ -14,7 +14,9 @@ class InsightsDismissalStore {
     final raw = prefs.getString(_prefsKey);
     if (raw == null) return {};
     final decoded = jsonDecode(raw) as Map<String, dynamic>;
-    return decoded.map((key, value) => MapEntry(key, DateTime.parse(value as String)));
+    return decoded.map(
+      (key, value) => MapEntry(key, DateTime.parse(value as String)),
+    );
   }
 
   static Future<void> dismiss(String category) async {

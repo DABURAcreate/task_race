@@ -53,10 +53,7 @@ class SummaryScreen extends StatelessWidget {
                   builder: (context, value, child) => Transform.scale(
                     scale: value,
                     alignment: Alignment.centerLeft,
-                    child: Opacity(
-                      opacity: value.clamp(0, 1),
-                      child: child,
-                    ),
+                    child: Opacity(opacity: value.clamp(0, 1), child: child),
                   ),
                   child: const Row(
                     children: [

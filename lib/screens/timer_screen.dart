@@ -147,13 +147,15 @@ class _TimerScreenState extends State<TimerScreen>
     ActiveSessionStore.clear();
     final actual = _session.stop();
     final scope = AppScope.of(context);
+    final finishedAt = DateTime.now();
 
     scope.repo.saveRun(
       widget.task.id,
       TaskRun(
+        id: finishedAt.microsecondsSinceEpoch.toString(),
         estimateSeconds: widget.estimateSeconds,
         actualSeconds: actual,
-        finishedAt: DateTime.now(),
+        finishedAt: finishedAt,
       ),
     );
 

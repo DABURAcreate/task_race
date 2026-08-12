@@ -51,9 +51,7 @@ ThemeData buildAppTheme() {
     textTheme: base.textTheme.copyWith(
       bodySmall: base.textTheme.bodySmall?.copyWith(color: AppColors.label),
       labelLarge: base.textTheme.labelLarge?.copyWith(color: AppColors.label),
-      labelMedium: base.textTheme.labelMedium?.copyWith(
-        color: AppColors.label,
-      ),
+      labelMedium: base.textTheme.labelMedium?.copyWith(color: AppColors.label),
       labelSmall: base.textTheme.labelSmall?.copyWith(color: AppColors.label),
     ),
   );

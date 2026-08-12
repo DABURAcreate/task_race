@@ -13,7 +13,11 @@ abstract class TaskRepository {
   List<Task> get allTasks;
 
   Task addTask(String name, String category);
-  void editTask(String taskId, {required String name, required String category});
+  void editTask(
+    String taskId, {
+    required String name,
+    required String category,
+  });
 
   /// Renames a category across every task that has it — including
   /// soft-deleted ones — so a rename doesn't fragment that category's
@@ -28,6 +32,19 @@ abstract class TaskRepository {
   /// equivalent of [deleteTask]. Their runs stay in [allTasks] too.
   void deleteCategory(String category);
   void saveRun(String taskId, TaskRun run);
+
+  /// Removes a single run — e.g. one that was mid-timer when the timer got
+  /// bumped, quietly setting a false personal best that would otherwise
+  /// become an unbeatable ghost forever.
+  void deleteRun(String taskId, String runId);
+
+  /// Corrects a run's recorded times in place, keeping its id and date.
+  void editRun(
+    String taskId,
+    String runId, {
+    required int estimateSeconds,
+    required int actualSeconds,
+  });
 
   /// Populates starter tasks on first run. Resolves once [tasks] reflects
   /// whatever was already on disk (if anything), so callers can await it
@@ -51,8 +68,7 @@ class InMemoryTaskRepository implements TaskRepository {
   late final Future<void> _ready;
 
   @override
-  List<Task> get tasks =>
-      List.unmodifiable(_tasks.where((t) => !t.deleted));
+  List<Task> get tasks => List.unmodifiable(_tasks.where((t) => !t.deleted));
 
   @override
   List<Task> get allTasks => List.unmodifiable(_tasks);
@@ -70,7 +86,11 @@ class InMemoryTaskRepository implements TaskRepository {
   }
 
   @override
-  void editTask(String taskId, {required String name, required String category}) {
+  void editTask(
+    String taskId, {
+    required String name,
+    required String category,
+  }) {
     final task = _tasks.firstWhere((t) => t.id == taskId);
     task.name = name;
     task.category = category;
@@ -103,6 +123,34 @@ class InMemoryTaskRepository implements TaskRepository {
   @override
   void saveRun(String taskId, TaskRun run) {
     _tasks.firstWhere((t) => t.id == taskId).runs.add(run);
+    _persist();
+  }
+
+  @override
+  void deleteRun(String taskId, String runId) {
+    _tasks
+        .firstWhere((t) => t.id == taskId)
+        .runs
+        .removeWhere((r) => r.id == runId);
+    _persist();
+  }
+
+  @override
+  void editRun(
+    String taskId,
+    String runId, {
+    required int estimateSeconds,
+    required int actualSeconds,
+  }) {
+    final runs = _tasks.firstWhere((t) => t.id == taskId).runs;
+    final index = runs.indexWhere((r) => r.id == runId);
+    if (index == -1) return;
+    runs[index] = TaskRun(
+      id: runId,
+      estimateSeconds: estimateSeconds,
+      actualSeconds: actualSeconds,
+      finishedAt: runs[index].finishedAt,
+    );
     _persist();
   }
 
@@ -153,14 +201,21 @@ class InMemoryTaskRepository implements TaskRepository {
   );
 
   Map<String, dynamic> _runToJson(TaskRun run) => {
+    'id': run.id,
     'estimateSeconds': run.estimateSeconds,
     'actualSeconds': run.actualSeconds,
     'finishedAt': run.finishedAt.toIso8601String(),
   };
 
-  TaskRun _runFromJson(Map<String, dynamic> json) => TaskRun(
-    estimateSeconds: json['estimateSeconds'] as int,
-    actualSeconds: json['actualSeconds'] as int,
-    finishedAt: DateTime.parse(json['finishedAt'] as String),
-  );
+  TaskRun _runFromJson(Map<String, dynamic> json) {
+    final finishedAt = DateTime.parse(json['finishedAt'] as String);
+    return TaskRun(
+      // Runs saved before per-run ids existed don't have this key — fall
+      // back to the finish timestamp, which was already effectively unique.
+      id: json['id'] as String? ?? finishedAt.microsecondsSinceEpoch.toString(),
+      estimateSeconds: json['estimateSeconds'] as int,
+      actualSeconds: json['actualSeconds'] as int,
+      finishedAt: finishedAt,
+    );
+  }
 }

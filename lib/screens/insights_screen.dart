@@ -55,9 +55,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
   Widget build(BuildContext context) {
     final dismissed = _dismissed;
     if (dismissed == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final repo = AppScope.of(context).repo;
@@ -80,30 +78,28 @@ class _InsightsScreenState extends State<InsightsScreen> {
       taskIdsByCategory.putIfAbsent(task.category, () => {}).add(task.id);
     }
 
-    final active = runsByCategory.entries
-        .where((e) {
-          final dismissedAt = dismissed[e.key];
-          if (dismissedAt == null) return true;
-          // A run since the dismissal means there's something new to
-          // report, so it un-hides itself.
-          return e.value.any((r) => r.finishedAt.isAfter(dismissedAt));
-        })
-        .map(
-          (e) => _CategoryInsight(
-            category: e.key,
-            ratio: averageAccuracyRatio(e.value)!,
-            sessionCount: e.value.length,
-            taskCount: taskIdsByCategory[e.key]!.length,
-          ),
-        )
-        .toList()
-      ..sort(
-        (a, b) => (b.ratio - 1).abs().compareTo((a.ratio - 1).abs()),
-      );
+    final active =
+        runsByCategory.entries
+            .where((e) {
+              final dismissedAt = dismissed[e.key];
+              if (dismissedAt == null) return true;
+              // A run since the dismissal means there's something new to
+              // report, so it un-hides itself.
+              return e.value.any((r) => r.finishedAt.isAfter(dismissedAt));
+            })
+            .map(
+              (e) => _CategoryInsight(
+                category: e.key,
+                ratio: averageAccuracyRatio(e.value)!,
+                sessionCount: e.value.length,
+                taskCount: taskIdsByCategory[e.key]!.length,
+              ),
+            )
+            .toList()
+          ..sort((a, b) => (b.ratio - 1).abs().compareTo((a.ratio - 1).abs()));
 
-    final idleCategories =
-        activeTasks.map((t) => t.category).toSet()
-          ..removeAll(runsByCategory.keys);
+    final idleCategories = activeTasks.map((t) => t.category).toSet()
+      ..removeAll(runsByCategory.keys);
     final idle = idleCategories.toList()..sort();
 
     return Scaffold(
@@ -129,7 +125,9 @@ class _InsightsScreenState extends State<InsightsScreen> {
                         color: Theme.of(context).colorScheme.secondaryContainer,
                         child: Icon(
                           Icons.visibility_off,
-                          color: Theme.of(context).colorScheme.onSecondaryContainer,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSecondaryContainer,
                         ),
                       ),
                       onDismissed: (_) => _dismissCategory(insight.category),

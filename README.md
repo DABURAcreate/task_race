@@ -44,7 +44,12 @@ tasks — studying, research, work, drawing — not chores.
   data, and the card comes back on its own the next time that category logs
   a run.
 - **Run history** — every past run for a task, with date, guess, actual
-  time, and win/loss, for debugging the numbers above it.
+  time, and win/loss, for debugging the numbers above it. A single bad run
+  (a forgotten pause, a fat-fingered guess) can quietly set a false
+  personal best and become an unbeatable ghost forever, so runs can be
+  fixed here: the edit icon corrects a run's guessed/actual time in place,
+  and swiping a run left deletes it — either way the ghost and category
+  accuracy recompute from what's left.
 - **Streak** — beating your estimate builds a streak; running over resets it
   to zero.
 - **Edit & soft delete** — long-press a task for a rename/delete menu (rename
