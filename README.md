@@ -42,6 +42,11 @@ tasks — studying, research, work, drawing — not chores.
   it across every task in that category at once (including deleted ones),
   so the category keeps one accuracy history instead of splitting in two.
   Renaming to an existing category's name merges the two.
+- **Category delete** — swipe a category's section header left to soft
+  delete it and every task inside it in one action (with a confirmation
+  showing how many tasks are affected). Swiping an individual task row
+  still deletes just that task; their runs stay in category insights
+  either way.
 - **Session survival** — if the app is killed mid-timer, relaunching it
   restores the running session from the correct elapsed time, not zero.
 - **Persistence** — tasks and run history are saved locally

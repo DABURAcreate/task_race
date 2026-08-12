@@ -23,6 +23,10 @@ abstract class TaskRepository {
   /// Soft delete: hides the task from [tasks] but keeps its runs in
   /// [allTasks] so category-level stats don't shift.
   void deleteTask(String taskId);
+
+  /// Soft delete every task in [category] at once — the category-level
+  /// equivalent of [deleteTask]. Their runs stay in [allTasks] too.
+  void deleteCategory(String category);
   void saveRun(String taskId, TaskRun run);
 
   /// Populates starter tasks on first run. Resolves once [tasks] reflects
@@ -85,6 +89,14 @@ class InMemoryTaskRepository implements TaskRepository {
   @override
   void deleteTask(String taskId) {
     _tasks.firstWhere((t) => t.id == taskId).deleted = true;
+    _persist();
+  }
+
+  @override
+  void deleteCategory(String category) {
+    for (final task in _tasks) {
+      if (task.category == category) task.deleted = true;
+    }
     _persist();
   }
 

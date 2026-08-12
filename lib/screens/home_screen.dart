@@ -104,15 +104,32 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: categories.length,
         itemBuilder: (context, i) {
           final category = categories[i];
-          return _CategorySection(
-            category: category,
-            tasks: grouped[category]!,
-            onTap: _startTask,
-            onHistory: _openHistory,
-            onLongPress: _openTaskMenu,
-            confirmDismiss: _confirmDelete,
-            onDismissed: _deleteTask,
-            onEditCategory: _editCategory,
+          final categoryTasks = grouped[category]!;
+          return Dismissible(
+            key: ValueKey('category-$category'),
+            direction: DismissDirection.endToStart,
+            background: Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              color: Theme.of(context).colorScheme.errorContainer,
+              child: Icon(
+                Icons.delete_sweep,
+                color: Theme.of(context).colorScheme.onErrorContainer,
+              ),
+            ),
+            confirmDismiss: (_) =>
+                _confirmDeleteCategory(category, categoryTasks.length),
+            onDismissed: (_) => _deleteCategory(category),
+            child: _CategorySection(
+              category: category,
+              tasks: categoryTasks,
+              onTap: _startTask,
+              onHistory: _openHistory,
+              onLongPress: _openTaskMenu,
+              confirmDismiss: _confirmDelete,
+              onDismissed: _deleteTask,
+              onEditCategory: _editCategory,
+            ),
           );
         },
       ),
@@ -267,6 +284,36 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _deleteTask(Task task) {
     setState(() => AppScope.of(context).repo.deleteTask(task.id));
+  }
+
+  Future<bool> _confirmDeleteCategory(String category, int taskCount) async {
+    final taskWord = taskCount == 1 ? 'task' : 'tasks';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete category?'),
+        content: Text(
+          'This removes "$category" and its $taskCount $taskWord from your '
+          'task list. Their past runs stay counted in your category '
+          'insights.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
+  }
+
+  void _deleteCategory(String category) {
+    setState(() => AppScope.of(context).repo.deleteCategory(category));
   }
 
   Future<void> _openShop(BuildContext context, AppScope scope) {
