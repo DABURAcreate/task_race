@@ -112,6 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onLongPress: _openTaskMenu,
             confirmDismiss: _confirmDelete,
             onDismissed: _deleteTask,
+            onEditCategory: _editCategory,
           );
         },
       ),
@@ -175,6 +176,38 @@ class _HomeScreenState extends State<HomeScreen> {
       () => AppScope.of(
         context,
       ).repo.editTask(task.id, name: name, category: category),
+    );
+  }
+
+  Future<void> _editCategory(String category) async {
+    final controller = TextEditingController(text: category);
+    final newCategory = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Rename category'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Category'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (newCategory == null || newCategory.isEmpty || newCategory == category) {
+      return;
+    }
+
+    setState(
+      () => AppScope.of(context).repo.renameCategory(category, newCategory),
     );
   }
 
@@ -405,6 +438,7 @@ class _CategorySection extends StatelessWidget {
   final ValueChanged<Task> onLongPress;
   final Future<bool> Function(Task) confirmDismiss;
   final ValueChanged<Task> onDismissed;
+  final ValueChanged<String> onEditCategory;
 
   const _CategorySection({
     required this.category,
@@ -414,6 +448,7 @@ class _CategorySection extends StatelessWidget {
     required this.onLongPress,
     required this.confirmDismiss,
     required this.onDismissed,
+    required this.onEditCategory,
   });
 
   @override
@@ -425,7 +460,17 @@ class _CategorySection extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
         key: PageStorageKey<String>(category),
-        title: Text(category),
+        title: Row(
+          children: [
+            Expanded(child: Text(category)),
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: 'Rename category',
+              visualDensity: VisualDensity.compact,
+              onPressed: () => onEditCategory(category),
+            ),
+          ],
+        ),
         subtitle: Text(
           ratio == null
               ? '${tasks.length} $taskWord'

@@ -15,6 +15,11 @@ abstract class TaskRepository {
   Task addTask(String name, String category);
   void editTask(String taskId, {required String name, required String category});
 
+  /// Renames a category across every task that has it — including
+  /// soft-deleted ones — so a rename doesn't fragment that category's
+  /// accuracy history under two names.
+  void renameCategory(String oldCategory, String newCategory);
+
   /// Soft delete: hides the task from [tasks] but keeps its runs in
   /// [allTasks] so category-level stats don't shift.
   void deleteTask(String taskId);
@@ -65,6 +70,15 @@ class InMemoryTaskRepository implements TaskRepository {
     final task = _tasks.firstWhere((t) => t.id == taskId);
     task.name = name;
     task.category = category;
+    _persist();
+  }
+
+  @override
+  void renameCategory(String oldCategory, String newCategory) {
+    if (oldCategory == newCategory) return;
+    for (final task in _tasks) {
+      if (task.category == oldCategory) task.category = newCategory;
+    }
     _persist();
   }
 

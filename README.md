@@ -34,10 +34,14 @@ tasks — studying, research, work, drawing — not chores.
 - **Coins & streak** — beating your estimate builds a streak and pays coins;
   running over breaks the streak and costs coins. A skip-penalty token
   (bought with coins) protects your streak once.
-- **Edit & soft delete** — long-press a task for a rename/delete menu, or
-  swipe it away to delete directly. Deleted tasks disappear from your list
-  but their runs stay in the category insights above, so tidying up
-  doesn't skew your stats.
+- **Edit & soft delete** — long-press a task for a rename/delete menu (rename
+  covers both its name and category), or swipe it away to delete directly.
+  Deleted tasks disappear from your list but their runs stay in the category
+  insights above, so tidying up doesn't skew your stats.
+- **Category rename** — the edit icon on a category's section header renames
+  it across every task in that category at once (including deleted ones),
+  so the category keeps one accuracy history instead of splitting in two.
+  Renaming to an existing category's name merges the two.
 - **Session survival** — if the app is killed mid-timer, relaunching it
   restores the running session from the correct elapsed time, not zero.
 - **Persistence** — tasks and run history are saved locally
