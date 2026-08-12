@@ -11,3 +11,12 @@ double? averageAccuracyRatio(Iterable<TaskRun> runs) {
   }
   return count == 0 ? null : sum / count;
 }
+
+/// Turns an [averageAccuracyRatio] into the "you under/overestimate" line
+/// shown next to a task or category. Within 5% either way counts as good.
+String describeAccuracy(double ratio) {
+  final pct = ((ratio - 1) * 100).round();
+  if (pct > 5) return 'You underestimate by $pct%';
+  if (pct < -5) return 'You overestimate by ${pct.abs()}%';
+  return 'Good guesser';
+}

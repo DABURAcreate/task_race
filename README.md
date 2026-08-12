@@ -21,6 +21,9 @@ tasks — studying, research, work, drawing — not chores.
 - **Categories** — tasks are tagged with a free-text category (autocomplete
   suggests ones you've already used). A new task under an existing category
   inherits that category's accuracy history immediately.
+- **Grouped task list** — the home screen buckets tasks into one collapsible
+  section per category (task count and category accuracy up front), so the
+  list stays short as tasks pile up instead of growing one row per task.
 - **Weekly insights** — a dedicated screen surfaces estimate accuracy by
   category over the last 7 days ("You underestimate Cleaning by 60%"),
   pooling runs from every task in that category, deleted or not. Categories

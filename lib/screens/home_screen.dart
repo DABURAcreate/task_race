@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../app.dart';
+import '../core/accuracy.dart';
 import '../core/formatters.dart';
 import '../data/active_session_store.dart';
 import '../models/task.dart';
@@ -57,6 +58,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final scope = AppScope.of(context);
     final tasks = scope.repo.tasks;
+    final grouped = _groupByCategory(tasks);
+    final categories = grouped.keys.toList()..sort();
 
     return Scaffold(
       appBar: AppBar(
@@ -98,34 +101,35 @@ class _HomeScreenState extends State<HomeScreen> {
       body: tasks.isEmpty
           ? const Center(child: Text('Add a task to start'))
           : ListView.builder(
-        itemCount: tasks.length,
-        itemBuilder: (context, i) => Dismissible(
-          key: ValueKey(tasks[i].id),
-          direction: DismissDirection.endToStart,
-          background: Container(
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            color: Theme.of(context).colorScheme.errorContainer,
-            child: Icon(
-              Icons.delete,
-              color: Theme.of(context).colorScheme.onErrorContainer,
-            ),
-          ),
-          confirmDismiss: (_) => _confirmDelete(tasks[i]),
-          onDismissed: (_) => _deleteTask(tasks[i]),
-          child: _TaskCard(
-            task: tasks[i],
-            onTap: () => _startTask(tasks[i]),
-            onHistory: () => _openHistory(tasks[i]),
-            onLongPress: () => _openTaskMenu(tasks[i]),
-          ),
-        ),
+        itemCount: categories.length,
+        itemBuilder: (context, i) {
+          final category = categories[i];
+          return _CategorySection(
+            category: category,
+            tasks: grouped[category]!,
+            onTap: _startTask,
+            onHistory: _openHistory,
+            onLongPress: _openTaskMenu,
+            confirmDismiss: _confirmDelete,
+            onDismissed: _deleteTask,
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addTask,
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  /// Non-deleted tasks, bucketed by category and kept in their original
+  /// (creation) order within each bucket.
+  Map<String, List<Task>> _groupByCategory(List<Task> tasks) {
+    final grouped = <String, List<Task>>{};
+    for (final task in tasks) {
+      grouped.putIfAbsent(task.category, () => []).add(task);
+    }
+    return grouped;
   }
 
   Future<void> _addTask() async {
@@ -390,6 +394,73 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+/// One category's tasks, collapsed behind a header by default so the home
+/// screen stays short as tasks pile up under the same category. Expansion
+/// state persists across rebuilds via [PageStorageKey].
+class _CategorySection extends StatelessWidget {
+  final String category;
+  final List<Task> tasks;
+  final ValueChanged<Task> onTap;
+  final ValueChanged<Task> onHistory;
+  final ValueChanged<Task> onLongPress;
+  final Future<bool> Function(Task) confirmDismiss;
+  final ValueChanged<Task> onDismissed;
+
+  const _CategorySection({
+    required this.category,
+    required this.tasks,
+    required this.onTap,
+    required this.onHistory,
+    required this.onLongPress,
+    required this.confirmDismiss,
+    required this.onDismissed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ratio = averageAccuracyRatio(tasks.expand((t) => t.runs));
+    final taskWord = tasks.length == 1 ? 'task' : 'tasks';
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: ExpansionTile(
+        key: PageStorageKey<String>(category),
+        title: Text(category),
+        subtitle: Text(
+          ratio == null
+              ? '${tasks.length} $taskWord'
+              : '${tasks.length} $taskWord  •  ${describeAccuracy(ratio)}',
+        ),
+        children: tasks
+            .map(
+              (task) => Dismissible(
+                key: ValueKey(task.id),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  child: Icon(
+                    Icons.delete,
+                    color: Theme.of(context).colorScheme.onErrorContainer,
+                  ),
+                ),
+                confirmDismiss: (_) => confirmDismiss(task),
+                onDismissed: (_) => onDismissed(task),
+                child: _TaskCard(
+                  task: task,
+                  onTap: () => onTap(task),
+                  onHistory: () => onHistory(task),
+                  onLongPress: () => onLongPress(task),
+                ),
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+}
+
 class _TaskCard extends StatelessWidget {
   final Task task;
   final VoidCallback onTap;
@@ -413,8 +484,8 @@ class _TaskCard extends StatelessWidget {
         title: Text(task.name),
         subtitle: Text(
           best == null
-              ? '${task.category}  •  No runs yet'
-              : '${task.category}  •  Best ${formatSeconds(best)}  •  ${_accuracyLine(ratio!)}',
+              ? 'No runs yet'
+              : 'Best ${formatSeconds(best)}  •  ${describeAccuracy(ratio!)}',
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -431,12 +502,5 @@ class _TaskCard extends StatelessWidget {
         onLongPress: onLongPress,
       ),
     );
-  }
-
-  String _accuracyLine(double ratio) {
-    final pct = ((ratio - 1) * 100).round();
-    if (pct > 5) return 'You underestimate by $pct%';
-    if (pct < -5) return 'You overestimate by ${pct.abs()}%';
-    return 'Good guesser';
   }
 }
