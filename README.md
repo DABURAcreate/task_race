@@ -18,6 +18,17 @@ tasks — studying, research, work, drawing — not chores.
 
 - **Ghost racing** — the timer screen shows your live progress against your
   fastest-ever run for that task.
+- **Pause & resume** — a real interruption (a call, someone walking in)
+  shouldn't inflate your time or poison the ghost it feeds. Pause freezes
+  the clock and the ghost bar together; resume picks the same run back up.
+  Paused time is banked out of the run entirely, not counted then
+  subtracted, so the final time is exactly what you spent actually doing
+  the task.
+- **Cancel a run** — the close icon (or the back gesture/button, which asks
+  the same thing) discards the run after a confirmation: no run saved, no
+  effect on your streak. For the wrong task started by mistake, or one
+  abandoned outright — "Done" always records a run, so it's the wrong exit
+  for either case.
 - **Categories** — tasks are tagged with a free-text category (autocomplete
   suggests ones you've already used). A new task under an existing category
   inherits that category's accuracy history immediately.
@@ -50,7 +61,8 @@ tasks — studying, research, work, drawing — not chores.
   still deletes just that task; their runs stay in category insights
   either way.
 - **Session survival** — if the app is killed mid-timer, relaunching it
-  restores the running session from the correct elapsed time, not zero.
+  restores the session from the correct elapsed time, not zero — and if it
+  was paused when the app died, it comes back paused, not silently ticking.
 - **Persistence** — tasks and run history are saved locally
   (`shared_preferences`) and reload on next launch.
 
@@ -85,10 +97,10 @@ lib/
     task.dart                  Task, TaskRun
   data/
     task_repository.dart       persisted task/run storage
-    active_session_store.dart  in-flight timer session, survives a kill
+    active_session_store.dart  in-flight timer session (paused or running), survives a kill
     insights_dismissal_store.dart  which weekly-insight cards are hidden
   state/
-    session_controller.dart    live timer state for one run
+    session_controller.dart    live timer state for one run, incl. pause/resume
     streak_controller.dart     win/loss streak
   services/
     notification_service.dart local notification wrapper

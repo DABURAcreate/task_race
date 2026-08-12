@@ -46,7 +46,10 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (_) => TimerScreen(
           task: task!,
           estimateSeconds: active.estimateSeconds,
-          resumeStartedAt: active.startedAt,
+          resume: (
+            accumulatedSeconds: active.accumulatedSeconds,
+            runningSince: active.runningSince,
+          ),
         ),
       ),
     );
@@ -67,9 +70,9 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.insights),
             tooltip: 'Weekly insights',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const InsightsScreen()),
-            ),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const InsightsScreen())),
           ),
           ListenableBuilder(
             listenable: scope.streak,
@@ -88,38 +91,38 @@ class _HomeScreenState extends State<HomeScreen> {
       body: tasks.isEmpty
           ? const Center(child: Text('Add a task to start'))
           : ListView.builder(
-        itemCount: categories.length,
-        itemBuilder: (context, i) {
-          final category = categories[i];
-          final categoryTasks = grouped[category]!;
-          return Dismissible(
-            key: ValueKey('category-$category'),
-            direction: DismissDirection.endToStart,
-            background: Container(
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              color: Theme.of(context).colorScheme.errorContainer,
-              child: Icon(
-                Icons.delete_sweep,
-                color: Theme.of(context).colorScheme.onErrorContainer,
-              ),
+              itemCount: categories.length,
+              itemBuilder: (context, i) {
+                final category = categories[i];
+                final categoryTasks = grouped[category]!;
+                return Dismissible(
+                  key: ValueKey('category-$category'),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    color: Theme.of(context).colorScheme.errorContainer,
+                    child: Icon(
+                      Icons.delete_sweep,
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                    ),
+                  ),
+                  confirmDismiss: (_) =>
+                      _confirmDeleteCategory(category, categoryTasks.length),
+                  onDismissed: (_) => _deleteCategory(category),
+                  child: _CategorySection(
+                    category: category,
+                    tasks: categoryTasks,
+                    onTap: _startTask,
+                    onHistory: _openHistory,
+                    onLongPress: _openTaskMenu,
+                    confirmDismiss: _confirmDelete,
+                    onDismissed: _deleteTask,
+                    onEditCategory: _editCategory,
+                  ),
+                );
+              },
             ),
-            confirmDismiss: (_) =>
-                _confirmDeleteCategory(category, categoryTasks.length),
-            onDismissed: (_) => _deleteCategory(category),
-            child: _CategorySection(
-              category: category,
-              tasks: categoryTasks,
-              onTap: _startTask,
-              onHistory: _openHistory,
-              onLongPress: _openTaskMenu,
-              confirmDismiss: _confirmDelete,
-              onDismissed: _deleteTask,
-              onEditCategory: _editCategory,
-            ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addTask,
         child: const Icon(Icons.add),
@@ -304,9 +307,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openHistory(Task task) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => HistoryScreen(task: task)),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => HistoryScreen(task: task)));
   }
 
   Future<void> _startTask(Task task) async {
