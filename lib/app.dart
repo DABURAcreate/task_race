@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'core/theme.dart';
 import 'data/task_repository.dart';
 import 'screens/home_screen.dart';
-import 'state/stakes_controller.dart';
+import 'state/streak_controller.dart';
 
 /// Holds the things every screen needs. Swap the repository here later.
 class AppScope extends InheritedWidget {
   final TaskRepository repo;
-  final StakesController stakes;
+  final StreakController streak;
 
   const AppScope({
     super.key,
     required this.repo,
-    required this.stakes,
+    required this.streak,
     required super.child,
   });
 
@@ -32,14 +32,14 @@ class TaskRaceApp extends StatefulWidget {
 
 class _TaskRaceAppState extends State<TaskRaceApp> {
   final TaskRepository _repo = InMemoryTaskRepository();
-  final StakesController _stakes = StakesController();
+  final StreakController _streak = StreakController();
   late final Future<void> _initialization = _repo.seed();
 
   @override
   Widget build(BuildContext context) {
     return AppScope(
       repo: _repo,
-      stakes: _stakes,
+      streak: _streak,
       child: MaterialApp(
         title: 'Ghost Timer',
         debugShowCheckedModeBanner: false,

@@ -11,8 +11,8 @@ tasks — studying, research, work, drawing — not chores.
    best for that task.
 3. Cross your estimate and you'll know it — a haptic buzz, a red screen
    flash, and a notification (even if you've switched apps).
-4. Finish, and see how you did: time, guess, difference, coins, streak, and
-   a distinct celebration if it's a new record.
+4. Finish, and see how you did: time, guess, difference, streak, and a
+   distinct celebration if it's a new record.
 
 ## Features
 
@@ -34,9 +34,8 @@ tasks — studying, research, work, drawing — not chores.
   a run.
 - **Run history** — every past run for a task, with date, guess, actual
   time, and win/loss, for debugging the numbers above it.
-- **Coins & streak** — beating your estimate builds a streak and pays coins;
-  running over breaks the streak and costs coins. A skip-penalty token
-  (bought with coins) protects your streak once.
+- **Streak** — beating your estimate builds a streak; running over resets it
+  to zero.
 - **Edit & soft delete** — long-press a task for a rename/delete menu (rename
   covers both its name and category), or swipe it away to delete directly.
   Deleted tasks disappear from your list but their runs stay in the category
@@ -73,7 +72,7 @@ lib/
     insights_dismissal_store.dart  which weekly-insight cards are hidden
   state/
     session_controller.dart    live timer state for one run
-    stakes_controller.dart     coins, streak, skip-penalty tokens
+    streak_controller.dart     win/loss streak
   services/
     notification_service.dart local notification wrapper
   screens/

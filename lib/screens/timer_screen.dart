@@ -103,7 +103,7 @@ class _TimerScreenState extends State<TimerScreen>
       ),
     );
 
-    final outcome = scope.stakes.apply(
+    final outcome = scope.streak.apply(
       estimate: widget.estimateSeconds,
       actual: actual,
     );

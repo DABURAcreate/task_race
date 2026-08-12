@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import '../core/formatters.dart';
 import '../models/task.dart';
-import '../state/stakes_controller.dart';
+import '../state/streak_controller.dart';
 
 class SummaryScreen extends StatelessWidget {
   final Task task;
   final int estimateSeconds;
   final int actualSeconds;
-  final StakesOutcome outcome;
+  final StreakOutcome outcome;
 
   const SummaryScreen({
     super.key,
@@ -31,11 +31,7 @@ class SummaryScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              outcome.beatEstimate
-                  ? 'Beat your estimate'
-                  : outcome.protected
-                  ? 'Ran over — streak protected'
-                  : 'Ran over',
+              outcome.beatEstimate ? 'Beat your estimate' : 'Ran over',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 24),
@@ -46,7 +42,6 @@ class SummaryScreen extends StatelessWidget {
               '${diff >= 0 ? '+' : ''}${formatSeconds(diff.abs())} ($pct%)',
             ),
             const Divider(height: 40),
-            _row('Coins', '${outcome.coinDelta >= 0 ? '+' : ''}${outcome.coinDelta}'),
             _row('Streak', '${outcome.streak}'),
             if (isRecord)
               Padding(
@@ -75,13 +70,6 @@ class SummaryScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                ),
-              ),
-            if (outcome.protected)
-              const Padding(
-                padding: EdgeInsets.only(top: 24),
-                child: Text(
-                  'Skip-penalty token used — no coins lost, streak safe.',
                 ),
               ),
             const Spacer(),

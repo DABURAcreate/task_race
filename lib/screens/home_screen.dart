@@ -4,7 +4,6 @@ import '../core/accuracy.dart';
 import '../core/formatters.dart';
 import '../data/active_session_store.dart';
 import '../models/task.dart';
-import '../state/stakes_controller.dart';
 import 'history_screen.dart';
 import 'insights_screen.dart';
 import 'timer_screen.dart';
@@ -73,24 +72,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           ListenableBuilder(
-            listenable: scope.stakes,
-            builder: (context, _) => IconButton(
-              icon: Badge(
-                label: Text('${scope.stakes.protectionTokens}'),
-                isLabelVisible: scope.stakes.protectionTokens > 0,
-                child: const Icon(Icons.shield_outlined),
-              ),
-              tooltip: 'Skip-penalty tokens',
-              onPressed: () => _openShop(context, scope),
-            ),
-          ),
-          ListenableBuilder(
-            listenable: scope.stakes,
+            listenable: scope.streak,
             builder: (context, _) => Padding(
               padding: const EdgeInsets.only(right: 16),
               child: Center(
                 child: Text(
-                  '🔥 ${scope.stakes.streak}   🪙 ${scope.stakes.coins}',
+                  '🔥 ${scope.streak.streak}',
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
               ),
@@ -314,40 +301,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _deleteCategory(String category) {
     setState(() => AppScope.of(context).repo.deleteCategory(category));
-  }
-
-  Future<void> _openShop(BuildContext context, AppScope scope) {
-    final stakes = scope.stakes;
-    const cost = StakesController.protectionTokenCost;
-
-    return showDialog<void>(
-      context: context,
-      builder: (context) => ListenableBuilder(
-        listenable: stakes,
-        builder: (context, _) {
-          final canAfford = stakes.coins >= cost;
-          return AlertDialog(
-            title: const Text('Skip-penalty token'),
-            content: Text(
-              'Protects your streak the next time you run over an estimate — '
-              'no coins lost, streak stays alive. Costs $cost coins.\n\n'
-              'You have ${stakes.coins} coins and ${stakes.protectionTokens} '
-              'token${stakes.protectionTokens == 1 ? '' : 's'}.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
-              ),
-              FilledButton(
-                onPressed: canAfford ? stakes.buyProtectionToken : null,
-                child: const Text('Buy for 100'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
   }
 
   void _openHistory(Task task) {
