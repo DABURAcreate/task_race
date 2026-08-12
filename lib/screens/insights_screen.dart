@@ -1,16 +1,65 @@
 import 'package:flutter/material.dart';
 import '../app.dart';
 import '../core/accuracy.dart';
+import '../data/insights_dismissal_store.dart';
 import '../models/task.dart';
 
 /// Estimate accuracy over the last 7 days, grouped by category rather than
 /// by individual task — so a brand-new task inherits a warning from other
 /// tasks already timed under the same category.
-class InsightsScreen extends StatelessWidget {
+class InsightsScreen extends StatefulWidget {
   const InsightsScreen({super.key});
 
   @override
+  State<InsightsScreen> createState() => _InsightsScreenState();
+}
+
+class _InsightsScreenState extends State<InsightsScreen> {
+  Map<String, DateTime>? _dismissed;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDismissed();
+  }
+
+  Future<void> _loadDismissed() async {
+    final dismissed = await InsightsDismissalStore.load();
+    if (!mounted) return;
+    setState(() => _dismissed = dismissed);
+  }
+
+  /// Hides a category's card. Doesn't touch task/run data — the card
+  /// reappears once that category has a run more recent than this.
+  void _dismissCategory(String category) {
+    setState(() => _dismissed = {...?_dismissed, category: DateTime.now()});
+    InsightsDismissalStore.dismiss(category);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('"$category" hidden from weekly insights'),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () => _undismissCategory(category),
+        ),
+      ),
+    );
+  }
+
+  void _undismissCategory(String category) {
+    setState(() => _dismissed = {...?_dismissed}..remove(category));
+    InsightsDismissalStore.undismiss(category);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final dismissed = _dismissed;
+    if (dismissed == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final repo = AppScope.of(context).repo;
     // Aggregates read from every task ever created — including deleted ones
     // — so removing a task from your active list doesn't shift a category's
@@ -32,6 +81,13 @@ class InsightsScreen extends StatelessWidget {
     }
 
     final active = runsByCategory.entries
+        .where((e) {
+          final dismissedAt = dismissed[e.key];
+          if (dismissedAt == null) return true;
+          // A run since the dismissal means there's something new to
+          // report, so it un-hides itself.
+          return e.value.any((r) => r.finishedAt.isAfter(dismissedAt));
+        })
         .map(
           (e) => _CategoryInsight(
             category: e.key,
@@ -63,7 +119,23 @@ class InsightsScreen extends StatelessWidget {
                     child: Text('No sessions in the last 7 days yet.'),
                   )
                 else
-                  ...active.map((insight) => _InsightCard(insight: insight)),
+                  ...active.map(
+                    (insight) => Dismissible(
+                      key: ValueKey('insight-${insight.category}'),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        child: Icon(
+                          Icons.visibility_off,
+                          color: Theme.of(context).colorScheme.onSecondaryContainer,
+                        ),
+                      ),
+                      onDismissed: (_) => _dismissCategory(insight.category),
+                      child: _InsightCard(insight: insight),
+                    ),
+                  ),
                 if (idle.isNotEmpty) ...[
                   const SizedBox(height: 24),
                   Text(

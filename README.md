@@ -28,7 +28,10 @@ tasks — studying, research, work, drawing — not chores.
   category over the last 7 days ("You underestimate Cleaning by 60%"),
   pooling runs from every task in that category, deleted or not. Categories
   with no sessions this week are listed separately, so a quiet category
-  reads as "idle," not "missing."
+  reads as "idle," not "missing." Swipe a card left to dismiss it (with an
+  Undo snackbar) — this only hides the card, it doesn't touch task or run
+  data, and the card comes back on its own the next time that category logs
+  a run.
 - **Run history** — every past run for a task, with date, guess, actual
   time, and win/loss, for debugging the numbers above it.
 - **Coins & streak** — beating your estimate builds a streak and pays coins;
@@ -67,6 +70,7 @@ lib/
   data/
     task_repository.dart       persisted task/run storage
     active_session_store.dart  in-flight timer session, survives a kill
+    insights_dismissal_store.dart  which weekly-insight cards are hidden
   state/
     session_controller.dart    live timer state for one run
     stakes_controller.dart     coins, streak, skip-penalty tokens
